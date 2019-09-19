@@ -9,24 +9,36 @@ from read_data import ReadData
 
 class BaseFunc():
     """
-    Include objective functions and gradient functions for optimisation
+    Include functions to get the sub design matrices for the specific indix
     Include line search method
-    Include functions to switch the models
+    Include functions to compute the information matrices
     """
 
     def __init__(self, mat_X, mat_Z, mat_W, vec_y, vec_n):
+        """
+        Define variables of use
 
+        Parameters:
+        - mat_X: The design matrix for the mean parameter beta
+        - mat_Z: The design matrix for the innovation parameter lambda
+        - mat_W: The design matrix for the auto regressive parameters gamma
+        - vec_y: The response vextor
+        - vec_n: The vector of the number of measurements for each subject
+        """
         self.mat_X = mat_X
         self.mat_Z = mat_Z
         self.mat_W = mat_W
         self.vec_y = vec_y
         self.vec_n = vec_n
 
+        # The number of subjects
         self.m = len(vec_n)
+        # An index list for searching the indices of X and Z
         self._index_list = self._get_index_list(self.vec_n)
         # Calculate the number of rows of W that the i-th subject has
         f = lambda x: x * (x - 1) / 2
         vec_nW = f(self.vec_n)
+        # An index list for searching the indices of W
         self._w_index_list = self._get_index_list(vec_nW)
 
         # Vectors for storing the linear predictors
@@ -223,19 +235,24 @@ class BaseFunc():
         """
         Get the information matrices
         """
+        # Initialise with zeros
         i_11 = np.zeros((self._num_bta, self._num_bta))
         i_22 = np.zeros((self._num_lmd, self._num_lmd))
         i_33 = np.zeros((self._num_gma, self._num_gma))
+        # Update i's in loop
         for i in range(self.m):
+            # Compute the matrix for beta
             inv_Di = self.get_D(i, inverse=True)
             mat_Ti = self.get_T(i)
             inv_Sigma = (mat_Ti.T) @ inv_Di @ mat_Ti
             mat_Xi = self.get_X(i)
             i_11 += mat_Xi.T @ inv_Sigma @ mat_Xi
 
+            # Compute the matrix for lambda
             mat_Zi = self.get_Z(i)
             i_22 += mat_Zi.T@mat_Zi / 2 * self.vec_n[i]
 
+            # compute the matrix for gamma
             mat_Wi = self.get_W(i)
             mat_Sigma = np.linalg.inv(inv_Sigma)
             index = 0

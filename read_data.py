@@ -14,7 +14,7 @@ class ReadData():
 
     def __init__(self, df, formula, poly_orders):
         """
-        Build a super class for JointModle. The data would be preprocessed to be
+        Build a super class for model_fit. The data would be preprocessed to be
         a standard form for analysis.
 
         Parameters:
@@ -36,6 +36,10 @@ class ReadData():
                  Package 'patsy' is used to achieve that.
              - x1+x3: Similar to the left part, except that they are
                  for the innovation variances.
+        - poly_orders: A tuple of length 3 or length 0. If the length is 3,
+             it specifies the polynomial orders of time for the mean, innovation
+             variance, and generalised auto regressive parameters. If the length
+             is 0, then the model selection procedures might be used.
         """
 
         # Extract information from the formula
@@ -68,11 +72,15 @@ class ReadData():
         return y_header, id_header, t_header, mean_part, inno_part
 
     def _sort_by_id(self, df, id_header, t_header):
-        """Sort the data by its id number (1st) and time (2nd)"""
+        """
+        Sort the data by its id number (1st) and time (2nd)
+        """
         return df.sort_values(by=[id_header, t_header])
 
     def _get_num(self, vec_id):
-        """Compute the number of measurements for each subject"""
+        """
+        Compute the number of measurements for each subject
+        """
         # Package 'collection' is used to count the numbers
         n = [b for a, b in sorted(dict(Counter(vec_id)).items())]
         # Return the number of measruements and the number of subjects
@@ -113,7 +121,6 @@ class ReadData():
                     for k in range(j):
                         wijk = [(ti[j] - ti[k])**l for l in range(num_col)]
                         mat = np.vstack((mat, wijk))
-
         return mat
 
     def _get_design(self, mean_part, inno_part, poly_orders):

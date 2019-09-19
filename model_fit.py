@@ -2,7 +2,6 @@ from math import *
 import numpy as np
 from scipy.optimize import *
 
-from read_data import ReadData
 from base_func import BaseFunc
 
 
@@ -11,36 +10,19 @@ class ModelFit(BaseFunc):
     Joint mean-covariance models for longitudinal data using MCD method
     """
 
-    def __init__(self, mat_X,mat_Z,mat_W,vec_y,vec_n, optim_meth='default'):
+    def __init__(self, mat_X, mat_Z, mat_W, vec_y, vec_n, optim_meth='default'):
         """
         Basic function for fitting the joint models
 
         Parameters:
-        - df: The dataset of interest. It should be a 'pandas' DataFrame
-        - formula: A formula showing the response, subject id, design
-             matrices. It is a string following the rules defined in R,
-             for example, 'y|id|t~x1+x2|x1+x3'.
-            [1] On the left hand side of '~', there are 3 headers of the
-             data, partitioned by '|':
-             - y: The response vector for all the subjects
-             - id: The ID number which identifying different subjects
-             - t: The vector of time, which constructs the polynomials
-                 for modelling the means, innovation variances, and
-                 generalised auto regressive parameters.
-            [2] On the right hand side of '~', there are two parts
-             partitioned by '|':
-             - x1+x2: '+' joints two headers, which are the covariates
-                 for the mean. There can be more headers and operators.
-                 Package 'patsy' is used to achieve that.
-             - x1+x3: Similar to the left part, except that they are
-                 for the innovation variances.
+        - mat_X, mat_Z, mat_W, vec_y, vec_n: see notes in BaseFunc
         - optim_meth: The optimisation algorithm used. There are 2 options:
             [1] 'default': use profile likelihood estimation to update
              the 3 types of parameters.
             [2] 'BFGS': use BFGS method to update all 3 parameters together
              If not specified, 'default' would be used
         """
-        super().__init__(mat_X,mat_Z,mat_W,vec_y,vec_n)
+        super().__init__(mat_X, mat_Z, mat_W, vec_y, vec_n)
         self.optim_meth = optim_meth
 
         # Get the dimension of beta, lambda, gamma
@@ -61,29 +43,27 @@ class ModelFit(BaseFunc):
         # Calculate the likelihood and BIC
         self.max_log_lik, self.bic = self._get_bic(self._theta)
 
-
-
     def _obj_fun_lmd(self, lmd, vec_e):
         """
         minus twice the log likelihood with respect to lambda
         vec_e is a fixed vector when beta and gamma are given
         """
-        zlmd = self.mat_Z@lmd
-        return np.sum(zlmd) + np.exp(-zlmd)@vec_e
+        zlmd = self.mat_Z @ lmd
+        return np.sum(zlmd) + np.exp(-zlmd) @ vec_e
 
     def _grad_lmd(self, lmd, vec_e):
         """
         The first derivative of obj_fun with respect to lambda
         """
-        zlmd = self.mat_Z@lmd
+        zlmd = self.mat_Z @ lmd
         return self.mat_Z.T @ (1. - np.exp(-zlmd) * vec_e)
 
     def _obj_fun(self, theta):
         """
         minus twice the log likelihood with respect to theta
         """
-        self._xbta = self.mat_X@theta[0:self._num_bta]
-        self._wgma = self.mat_W@theta[self._num_bta + self._num_lmd:]
+        self._xbta = self.mat_X @ theta[0:self._num_bta]
+        self._wgma = self.mat_W @ theta[self._num_bta + self._num_lmd:]
         lmd = theta[self._num_bta:self._num_bta + self._num_lmd]
         vec_e = self._get_e()
         return self._obj_fun_lmd(lmd, vec_e)
@@ -92,9 +72,9 @@ class ModelFit(BaseFunc):
         """
         The first derivative of obj_fun with respect to theta
         """
-        self._xbta = self.mat_X@theta[0:self._num_bta]
-        self._zlmd = self.mat_Z@theta[self._num_bta:self._num_bta + self._num_lmd]
-        self._wgma = self.mat_W@theta[self._num_bta + self._num_lmd:]
+        self._xbta = self.mat_X @ theta[0:self._num_bta]
+        self._zlmd = self.mat_Z @ theta[self._num_bta:self._num_bta + self._num_lmd]
+        self._wgma = self.mat_W @ theta[self._num_bta + self._num_lmd:]
 
         output = np.zeros(self._num_theta)
         for i in range(self.m):
@@ -103,15 +83,15 @@ class ModelFit(BaseFunc):
             inv_Sigma = (mat_Ti.T) @ inv_Di @ mat_Ti
             mat_Xi = self.get_X(i)
             vec_ri = self.get_residual(i)
-            output[0:self._num_bta] += mat_Xi.T@inv_Sigma@vec_ri
+            output[0:self._num_bta] += mat_Xi.T @ inv_Sigma@vec_ri
 
             mat_Zi = self.get_Z(i)
-            vec_tr = mat_Ti@vec_ri
+            vec_tr = mat_Ti @ vec_ri
             vec_ei = vec_tr**2
-            output[self._num_bta:self._num_bta + self._num_lmd] += mat_Zi.T@(np.diag(inv_Di) * vec_ei - 1.) / 2
+            output[self._num_bta:self._num_bta + self._num_lmd] += mat_Zi.T @ (np.diag(inv_Di) * vec_ei - 1.) / 2
 
             mat_Gi = self._get_G(i)
-            output[self._num_bta + self._num_lmd:] += (np.diag(inv_Di) * vec_tr)@mat_Gi
+            output[self._num_bta + self._num_lmd:] += (np.diag(inv_Di) * vec_tr) @ mat_Gi
         return output * (-2)
 
     def _update_beta(self):
@@ -168,21 +148,21 @@ class ModelFit(BaseFunc):
         """
         # update beta
         self._update_beta()
-        self._xbta = self.mat_X@self._bta
+        self._xbta = self.mat_X @ self._bta
         # update lambda
         self._update_lambda()
-        self._zlmd = self.mat_Z@self._lmd
+        self._zlmd = self.mat_Z @ self._lmd
         # update gamma
         self._update_gamma()
-        self._wgma = self.mat_W@self._gma
+        self._wgma = self.mat_W @ self._gma
 
     def _update_dots(self):
         """
         Update the linear predictors
         """
-        self._xbta = self.mat_X@self._bta
-        self._zlmd = self.mat_Z@self._lmd
-        self._wgma = self.mat_W@self._gma
+        self._xbta = self.mat_X @ self._bta
+        self._zlmd = self.mat_Z @ self._lmd
+        self._wgma = self.mat_W @ self._gma
 
     def _auto_initial(self):
         """
@@ -200,7 +180,6 @@ class ModelFit(BaseFunc):
         # initialise gamma with zeros
         self._theta[self._num_bta + self._num_lmd:] = np.zeros(self._num_gma)
         self._update_dots()
-
 
     def _method_1(self, tolerance=1e-4, step_max=100):
         """
@@ -270,4 +249,3 @@ class ModelFit(BaseFunc):
         max_log_lik = - self._obj_fun(theta) / 2
         bic = (len(theta) * log(self.m) - 2 * max_log_lik) / self.m
         return max_log_lik, bic
-

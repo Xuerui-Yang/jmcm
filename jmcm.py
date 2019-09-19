@@ -1,4 +1,3 @@
-from math import *
 import numpy as np
 from tabulate import tabulate
 import matplotlib.pyplot as plt
@@ -35,15 +34,16 @@ class JointModel(ReadData, ModelFit, BaseFunc):
                  Package 'patsy' is used to achieve that.
              - x1+x3: Similar to the left part, except that they are
                  for the innovation variances.
-        - poly_orders: An integer vector of length three containing
-             the degrees of the three polynomial functions for the
-             mean structure, the log innovation variances and the
-             autoregressive parameters
+        - poly_orders: A tuple of length 3 or length 0. If the length is 3,
+             it specifies the polynomial orders of time for the mean, innovation
+             variance, and generalised auto regressive parameters. If the length
+             is 0, then the model selection procedures might be used.
         - optim_meth: The optimisation algorithm used. There are 2 options:
             [1] 'default': use profile likelihood estimation to update
              the 3 types of parameters.
             [2] 'BFGS': use BFGS method to update all 3 parameters together
              If not specified, 'default' would be used
+        - model_select: True or False. To do model selection or not.
         """
 
         # Read data to get the design matrices, response, and ID numbers
@@ -239,36 +239,48 @@ class JointModel(ReadData, ModelFit, BaseFunc):
         return x_boot, z_boot, w_boot, y_boot, n_boot
 
     def boot_curve(self, num_boot):
+        """
+        Plot the curves onto time with bootstrap confidence bands
+
+        Parameters:
+        - num_boot: The number of bootstrap samples. (One should try with 
+         small numbers at the beginning.)
+        """
+        # Get the explanatory variables time and time lags
         ts = np.linspace(np.min(self.vec_t), np.max(self.vec_t), 100)
         tslag = np.linspace(0, np.max(self.vec_t) - np.min(self.vec_t), 100)
 
+        # Compute the estimated mean
         mat_X_ts = np.ones((len(ts), self._num_bta))
         for i in range(1, self._num_bta):
             mat_X_ts[:, i] = np.power(ts, i)
         yest = mat_X_ts @self._bta
-        yest_boot = np.empty((100, num_boot))
-
+        
+        # Compute the estimated log innovation variance
         mat_Z_ts = np.ones((len(ts), self._num_lmd))
         for i in range(1, self._num_lmd):
             mat_Z_ts[:, i] = np.power(ts, i)
         log_s = mat_Z_ts @ self._lmd
-        logs_boot = np.empty((100, num_boot))
-
+        
+        # Compute the estimated generalised auto regressive parameters
         mat_W_tslag = np.ones((len(tslag), self._num_gma))
         for i in range(1, self._num_gma):
             mat_W_tslag[:, i] = np.power(tslag, i)
         garp = mat_W_tslag @ self._gma
+        
+        # Get the bootstrap estimates
+        yest_boot = np.empty((100, num_boot))
+        logs_boot = np.empty((100, num_boot))
         garp_boot = np.empty((100, num_boot))
-
         for i in range(num_boot):
             x_boot, z_boot, w_boot, y_boot, n_boot = self._bootstrap_data()
             mf = ModelFit(x_boot, z_boot, w_boot, y_boot,
                           n_boot, self.optim_meth)
+            yest_boot[:, i] = mat_X_ts @ mf._bta
+            logs_boot[:, i] = mat_Z_ts @ mf._lmd
+            garp_boot[:, i] = mat_W_tslag @ mf._gma
 
-            yest_boot[:, i] = mat_X_ts@mf._bta
-            logs_boot[:, i] = mat_Z_ts@mf._lmd
-            garp_boot[:, i] = mat_W_tslag@mf._gma
-
+        # Get the lower and upper bands
         yest_u = np.quantile(yest_boot, 0.975, axis=1)
         yest_l = np.quantile(yest_boot, 0.025, axis=1)
         logs_u = np.quantile(logs_boot, 0.975, axis=1)
@@ -276,6 +288,7 @@ class JointModel(ReadData, ModelFit, BaseFunc):
         garp_u = np.quantile(garp_boot, 0.975, axis=1)
         garp_l = np.quantile(garp_boot, 0.025, axis=1)
 
+        # Plot the curves
         fig = plt.figure(figsize=(12, 8))
         ax1 = fig.add_subplot(211)
         ax1.plot(ts, yest_l, color='black', linewidth=1, linestyle='dashed')
