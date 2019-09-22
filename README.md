@@ -1,7 +1,15 @@
 # jmcm
 
 ## Description
-jmcm is a Python package for fitting the joint mean-covariance models. 
-You can use jmcm to select the models, compute the estimates of the parameters, do the hypothesis tests, and plot the curves.
+jmcm is an open-source Python package for fitting the joint mean-covariance models for longitudinal data. 
+
+It provides:
+* function to estimate parameters for the mean, innovation variance, and generalised auto-regressive coefficient
+* function to do the Wald hypothesis tests to check the significance of the parameters
+* model selection procedures
+* bootstrap method to plot the curves for the mean, innovation variance, and generalised auto-regressive coefficient
+
+## Source code
+https://github.com/Xuerui-Yang/jmcm
 
 ## Installation
