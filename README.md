@@ -13,4 +13,6 @@ It provides:
 https://github.com/Xuerui-Yang/jmcm
 
 ## Installation
-`pip install jmcm`
+```
+pip install jmcm
+```
