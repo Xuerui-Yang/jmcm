@@ -1,5 +1,6 @@
 # jmcm
-https://www.travis-ci.org/Xuerui-Yang/jmcm.svg?branch=master
+[![Build Status](https://www.travis-ci.org/Xuerui-Yang/jmcm.svg?branch=master
+)](https://www.travis-ci.org/Xuerui-Yang/jmcm)
 
 ## Description
 jmcm is an open-source Python package for fitting the joint mean-covariance models for longitudinal data. 
