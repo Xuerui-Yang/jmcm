@@ -17,4 +17,4 @@ def test_class():
 	assert bf.get_W(0) is not None
 
 if __name__ == '__main__':
-    pytest.main(["test_basefunc.py"])
+    pytest.main(["test2_basefunc.py"])
