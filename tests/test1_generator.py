@@ -11,4 +11,4 @@ def test():
     assert df.iloc[-1]['id']==m-1
 
 if __name__ == '__main__':
-    pytest.main(["test_generator.py"])
+    pytest.main(["test1_generator.py"])
