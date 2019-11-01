@@ -19,4 +19,4 @@ def test_functions():
 	JM.wald_test()
 
 if __name__ == '__main__':
-    pytest.main(["test_jmcm.py"])
+    pytest.main(["test3_jmcm.py"])
