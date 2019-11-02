@@ -20,7 +20,8 @@ pip install jmcm
 ```
 
 ## Usage
-```
+The following command computes the estimates of parameters for a joint mean-covariance model.
+```python
 from jmcm import JointModel
 JM=JointModel(df, formula, poly_orders = (), optim_meth = 'default', model_select = False)
 ```
@@ -46,11 +47,12 @@ If not specified, 'default' would be used
    1. poly_orderes is assigned with a tuple of length 3. Then a traverse under the given triple would be done to find the the triple with the smallest BIC values. And the model would be fitted based on the selected poly_orders
    2. poly_orders is not assigned or assigned in a incorrect format. Then the a profile based search would be done. And the model would be fitted based on the selected poly_orders.
 
-```
+The following commands print the values of MLEs, BICs, test statistics, p-values, and figures of curves. 
+```python
 JM.summary()
 JM.wald_test()
 JM.boot_curve(num_boot)
 ```
 
 ### Arguments
-- **num_boot**: The number of bootstrap samples. Note that a large number may cost much time
+- **num_boot**: The number of bootstrap samples. Note that a large number may cost much time to run
