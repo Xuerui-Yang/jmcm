@@ -9,7 +9,7 @@ def poly(para,ipt):
 		opt+=para[i]*(ipt**i)
 	return opt
 
-def simulate(bta,lmd,gma,m=500,ni_max=10):
+def simulate(bta,lmd,gma,m,ni_max):
 	vec_y=np.empty(0)
 	vec_id=np.empty(0)
 	vec_t=np.empty(0)
@@ -38,3 +38,8 @@ def sim_par(num_bta,num_lmd,num_gma):
 	lmd=np.random.uniform(-1,1,(num_lmd,))
 	gma=np.random.uniform(-1,1,(num_gma,))
 	return bta,lmd,gma
+
+def generator(m=500,ni_max=10):
+	bta,lmd,gma=sim_par(3,3,3)
+	df=simulate(bta,lmd,gma,m,ni_max)
+	return df
