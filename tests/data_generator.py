@@ -32,3 +32,9 @@ def simulate(bta,lmd,gma,m=500,ni_max=10):
 		vec_y=np.append(vec_y,yi)
 	df = pd.DataFrame({'y': vec_y, 'id': vec_id, 't': vec_t})
 	return df
+
+def sim_par(num_bta,num_lmd,num_gma):
+	bta=np.random.uniform(-1,1,(num_bta,))
+	lmd=np.random.uniform(-1,1,(num_lmd,))
+	gma=np.random.uniform(-1,1,(num_gma,))
+	return bta,lmd,gma
