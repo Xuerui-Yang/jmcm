@@ -5,7 +5,8 @@ from jmcm.core.base_func import BaseFunc
 from jmcm.core.read_data import ReadData
 
 def test_class():
-	df=generator(10)
+	bta,lmd,gma=sim_par(3,3,3)
+	df=generator(bta,lmd,gma,m=10)
 	rd=ReadData(df, "y|id|t~1|1", (3,3,3))
 	assert rd.mat_X.shape[1]==4
 	assert rd.mat_Z.shape[1]==4
