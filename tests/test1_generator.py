@@ -1,13 +1,10 @@
 import pytest
 import pandas as pd
 
-from data_generator import simulate,sim_par
+from data_generator import generator
 
 def test():
-    m=3
-    bta,lmd,gma=sim_par(3,3,3)
-    assert len(bta)==3
-    df=simulate(bta,lmd,gma,m)
+    df=generator(m=3)
     assert isinstance(df, pd.DataFrame)
     assert df.shape[1]==3
     assert df.iloc[-1]['id']==m-1
