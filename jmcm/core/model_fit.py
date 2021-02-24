@@ -40,6 +40,8 @@ class ModelFit(BaseFunc):
         # Fit the model
         self._model_fit()
 
+        self._update_dots()
+
         # Calculate the likelihood and BIC
         self.max_log_lik, self.bic = self._get_bic(self._theta)
 
