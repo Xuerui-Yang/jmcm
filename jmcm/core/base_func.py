@@ -256,9 +256,9 @@ class BaseFunc():
             mat_Sigma = np.linalg.inv(inv_Sigma)
             index = 0
             for j in range(1, self.vec_n[i]):
-                for k in range(j - 1):
+                for k in range(j):
                     wijk = np.expand_dims(mat_Wi[index + k], axis=1)
-                    for l in range(j - 1):
+                    for l in range(j):
                         wijl = np.expand_dims(mat_Wi[index + l], axis=0)
                         i_33 += inv_Di[j, j] * mat_Sigma[k, l] * wijk @ wijl
                 index += j
