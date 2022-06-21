@@ -8,7 +8,7 @@ idna==2.8
 jmcm==0.1.2
 kiwisolver==1.1.0
 matplotlib==3.1.1
-numpy==1.17.2
+numpy==1.22.0
 pandas==0.25.1
 patsy==0.5.1
 pkginfo==1.5.0.1
